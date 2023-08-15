@@ -14,13 +14,7 @@ class FoodOrderApplication :Application(){
     override fun onCreate() {
         super.onCreate()
         prefs = ProfilePreference(this)
-        ProcessLifecycleOwner.get()
-            .lifecycle
-            .addObserver(
-                AppLifecycleObserver()
-            )
+
     }
-    init {
-        instance = this
-    }
+
 }

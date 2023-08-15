@@ -60,7 +60,6 @@ class OrderFood : AppCompatActivity(){
 
             val urlLocalHost = "http://192.168.56.1//:80"  // Server-side endpoint
             val jsonArr=JSONArray(arrayOf(numFrenchFries.text.toString().toInt(), numBigMac.text.toString().toInt()))
-//            val jsonData = "\"method\": \"order\",  \"data\": {$jsonArr}"
             val jsonObject = JSONObject()
             jsonObject.put("method", "ordering")
             jsonObject.put("args", jsonArr)
@@ -69,13 +68,10 @@ class OrderFood : AppCompatActivity(){
 
             Thread{
                 val requestBody = jsonObject.toString().toRequestBody(mediaType)
-//                val postBody: RequestBody = FormBody.Builder()
-//                    .add("French Fries", numOneText.text.toString())
-//                    .add("Big Mac", numTwoText.text.toString())
-//                    .build()
                 val request = Request.Builder()
                     .url(urlLocalHost)
                     .post(requestBody)
+                    .addHeader("Cookie", "sid=${Profile.sid}")
                     .build()
                 val response: Response
                 val client:OkHttpClient= OkHttpClient()
@@ -121,7 +117,7 @@ class OrderFood : AppCompatActivity(){
             startActivity(intent)
         }
     }
-    fun parseSidCookie(cookiesHeader: String): String? {
+    private fun parseSidCookie(cookiesHeader: String): String? {
         val cookies = cookiesHeader.split(";").map { it.trim() }
         for (cookie in cookies) {
             val parts = cookie.split("=")

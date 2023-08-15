@@ -27,62 +27,53 @@ class App:
         return [big_mac_cost, french_fries_cost, total_price]
 
     def init_request(self, request):
-        local.request=request
-        return self.handle_request(request)
-    
-    def handle_request(self, request):
         sid = request.cookies.get('sid')
-        # print("cookies:{}".format(request.cookies))
         resp=None
-        # print("session sid is:{}".format(local.request.session.sid))
-        
         request.session=Session(sid=sid)
         print("sid after generating is:{}".format(request.session.sid))
         if request.method == "POST":
-            # print("received")
             request_body = request.get_json()
-            print("Received data from the client:")
-            print(request_body)
-            # handle each request
-            if request_body["method"] == "ordering":
-                # Process the data as needed (e.g., save to database, perform calculations)
-                data = request_body["args"]
-                args = [data[0], data[1]]
-                # Send a response back to the client (e.g., confirming data received)
-                args.extend(self.calculate_cost(data[0], data[1]))
-
-                # print("total_price:", args[4])
-
-                reponse_from_db = self.db.send_order(args)
-                response_data = json.dumps(
-                    {"total price": args[4], "commit": reponse_from_db[0]}
-                )
-                resp=Response(
-                    response_data, content_type="application/json", status=200
-                )
-            if request_body["method"] == "view order":
-                data = request_body["args"]
-                args = [request_body["args"][0]]
-                response_from_db = self.db.get_order(args)
-                response_data = json.dumps(
-                    {
-                        "commit": response_from_db[0],
-                        "response data": response_from_db[1],
-                    }
-                )
-                print("response data")
-                print(response_from_db[1])
-                resp= Response(
-                    response_data, content_type="application/json", status=200
-                )
-        else:
-            resp= Response("Method Not Allowed", status=405)
-        if resp:
+            method=request_body["method"]
+            data=request_body["args"]
+            resp= self.handle_request(method, data, request.session.sid)
             expires = datetime.datetime.now() + datetime.timedelta(days=365)
             resp.set_cookie("sid", request.session.sid, expires=expires)
-            # print("response id:{}", resp.cookies.get('sid'))
-        # print("response is:{}".format(resp))
+        else:
+            resp= Response("Method Not Allowed", status=405)
         return resp
+    
+    def handle_request(self, method, data,sid):
+        response_data=None
+        if method=="init":
+            if sid != None:
+                response_data=json.dumps({"success": True})
+                print("store successfully")
+            else:
+                response_data=json.dumps({"success":False})
+        if method=="ordering":
+            args=[data[0], data[1]]
+            args.extend(self.calculate_cost(data[0], data[1]))
+            reponse_from_db = self.db.send_order(args)
+            response_data = json.dumps(
+                {"total price": args[4], "commit": reponse_from_db[0]}
+            )
+            
+            
+        if method=="view order":
+            args = [data[0]]
+            response_from_db = self.db.get_order(args)
+            response_data = json.dumps(
+                {
+                    "commit": response_from_db[0],
+                    "response data": response_from_db[1],
+                }
+            )
+            print("response data")
+            print(response_from_db[1])
+        return Response(
+            response_data, content_type="application/json", status=200
+        )
+        
 
     def wsgi_app(self, environ, start_response):
         """WSGI application that processes requests and returns responses."""

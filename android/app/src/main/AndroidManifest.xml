@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application
+        android:name=".FoodOrderApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,6 +18,7 @@
         <activity android:name=".OrderFood"> </activity>
         <activity android:name=".ViewRecipe"></activity>
         <activity android:name=".ViewMenu"></activity>
+        <activity android:name=".OrderMenu"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">
