@@ -58,7 +58,7 @@ class OrderFood : AppCompatActivity(){
         val sidView=findViewById<TextView>(R.id.sidTextView)
         orderFood.setOnClickListener{
 
-            val urlLocalHost = "http://192.168.56.1//:80"  // Server-side endpoint
+//            val urlLocalHost = "http://192.168.56.1//:80"  // Server-side endpoint
             val jsonArr=JSONArray(arrayOf(numFrenchFries.text.toString().toInt(), numBigMac.text.toString().toInt()))
             val jsonObject = JSONObject()
             jsonObject.put("method", "ordering")
@@ -69,7 +69,7 @@ class OrderFood : AppCompatActivity(){
             Thread{
                 val requestBody = jsonObject.toString().toRequestBody(mediaType)
                 val request = Request.Builder()
-                    .url(urlLocalHost)
+                    .url(Profile.baseUrl)
                     .post(requestBody)
                     .addHeader("Cookie", "sid=${Profile.sid}")
                     .build()

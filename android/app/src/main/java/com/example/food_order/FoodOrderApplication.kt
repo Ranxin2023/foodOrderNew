@@ -14,7 +14,7 @@ class FoodOrderApplication :Application(){
     override fun onCreate() {
         super.onCreate()
         prefs = ProfilePreference(this)
-
+//        prefs!!.baseUrl="http://192.168.56.1//:80"
     }
 
 }

@@ -27,14 +27,14 @@ class OrderDatabase:
         self.ssl = {}
 
     def connect_db(self):
-        self.conn = pymysql.connect(
+        self._conn = pymysql.connect(
             host=self.host,
             user=self.user,
             password=self.password,
             db=self.cur_db_name,
         )
 
-        self._cursor = self.conn.cursor()
+        self._cursor = self._conn.cursor()
 
     def send_order(self, args):
         french_fries_quantity = int(args[0])
@@ -59,11 +59,11 @@ class OrderDatabase:
                     total_cost,
                 ),
             )
-            self.conn.commit()
+            self._conn.commit()
             return True, None
         except pymysql.Error as e:
             print("Error sending order to the database:", e)
-            self.conn.rollback()
+            self._conn.rollback()
             return False, str(e)
 
     def get_order(self, args):
@@ -81,5 +81,5 @@ class OrderDatabase:
             return True, res
         except pymysql.Error as e:
             print("Error getting order to the database:", e)
-            self.conn.rollback()
+            self._conn.rollback()
             return False, str(e)

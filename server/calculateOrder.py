@@ -16,7 +16,7 @@ class App:
         self.db_username = "root"
         self.db_password = "R@ndyli94041424"
         self.db = OrderDatabase(localhost, self.db_username, self.db_password)
-        # self.sid=None
+        self.request=None
 
     def calculate_cost(self, french_fries_count, big_mac_count):
         french_fries_price = 1.95
@@ -27,30 +27,44 @@ class App:
         return [big_mac_cost, french_fries_cost, total_price]
 
     def init_request(self, request):
+        self.request=request
         sid = request.cookies.get('sid')
         resp=None
-        request.session=Session(sid=sid)
-        print("sid after generating is:{}".format(request.session.sid))
         if request.method == "POST":
             request_body = request.get_json()
+            
             method=request_body["method"]
             data=request_body["args"]
-            resp= self.handle_request(method, data, request.session.sid)
+            resp= self.handle_request(method, data, sid)
             expires = datetime.datetime.now() + datetime.timedelta(days=365)
-            resp.set_cookie("sid", request.session.sid, expires=expires)
+            resp.set_cookie("sid", self.request.session.sid, expires=expires)
         else:
             resp= Response("Method Not Allowed", status=405)
         return resp
     
-    def handle_request(self, method, data,sid):
+    def handle_request(self, method, data, sid):
         response_data=None
         if method=="init":
-            if sid != None:
-                response_data=json.dumps({"success": True})
-                print("store successfully")
-            else:
-                response_data=json.dumps({"success":False})
+            self.request.session=Session(sid=sid)
+            # print("sid after generating is:{}".format(self.request.session.sid))
+            response_from_db=self.request.session.store_in_db(data)
+            response_data=json.dumps(
+                {
+                    "success": response_from_db[0]
+                }
+            )
+        if method=="exit":
+            self.request.session=Session(sid=sid)
+            # print("sid after generating is:{}".format(self.request.session.sid))
+            response_from_db=self.request.session.exit_from_db(data)
+            response_data=json.dumps(
+                {
+                    "success": response_from_db[0]
+                }
+            )
+            self.request.session.sid=""
         if method=="ordering":
+            self.request.session=Session(sid=sid)
             args=[data[0], data[1]]
             args.extend(self.calculate_cost(data[0], data[1]))
             reponse_from_db = self.db.send_order(args)
@@ -60,6 +74,7 @@ class App:
             
             
         if method=="view order":
+            self.request.session=Session(sid=sid)
             args = [data[0]]
             response_from_db = self.db.get_order(args)
             response_data = json.dumps(

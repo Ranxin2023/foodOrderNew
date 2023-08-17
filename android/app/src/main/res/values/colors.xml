@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="orange">#FFFF8800</color>
     <color name="viewOrder">#FF8888FF</color>
+    <color name="logout">#88FF2266</color>
 </resources>
